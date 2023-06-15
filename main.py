@@ -18,7 +18,10 @@ font1 = font.SysFont('Arial', 50)
 win = font1.render("Игра окончена!", True, (200, 10, 50))
 
 
-
+mixer.init()
+mixer.music.load('fon_music.mp3')
+mixer.music.play()
+#otbev = mixer.Sound('otbev.mp3')
 
 
 
@@ -125,10 +128,12 @@ while game == True:
             finish = True
 
         if ball.colliderect(platform_1.rect):
+            #otbev.play()
             ball.speed_x -= 1.2
             ball.speed_x *= -1
             
         if ball.colliderect(platform_2.rect):
+            #otbev.play()
             ball.speed_x += 1.2
             ball.speed_x *= -1
             
