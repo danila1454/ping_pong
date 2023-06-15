@@ -13,8 +13,9 @@ fon = transform.scale(image.load('maxer.jpg'), (700, 500))
 
 
 
-
-
+font.init()
+font1 = font.SysFont('Arial', 50)
+win = font1.render("Игра окончена!", True, (200, 10, 50))
 
 
 
@@ -117,14 +118,20 @@ while game == True:
             ball.speed_y *= -1
         
         if ball.rect.x > 690:
+            window.blit(win, (200, 200))
             finish = True
         if ball.rect.x < 10:
+            window.blit(win, (200, 200))
             finish = True
 
         if ball.colliderect(platform_1.rect):
+            ball.speed_x -= 1.2
             ball.speed_x *= -1
+            
         if ball.colliderect(platform_2.rect):
+            ball.speed_x += 1.2
             ball.speed_x *= -1
+            
         
 
         
