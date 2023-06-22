@@ -1,36 +1,70 @@
 from pygame import *
+from random import randint
+
 width = 700
 height = 500
 window = display.set_mode((width, height))
-display.set_caption('Ping pong')
+display.set_caption('Jumper')
+game = True
 
 FPS = 60
 clock = time.Clock()
 
-game = True
+fon = transform.scale(image.load('fon_1.jpg'), (700, 500))
 
-fon = transform.scale(image.load('maxer.jpg'), (700, 500))
+fon_game_over = transform.scale(image.load('fon_2.jpg'), (700, 500))
+
+amount_proiden = 0
+
+
+mixer.init()
+mixer.music.load('Breathe.mp3')
+mixer.music.play()
+otbev = mixer.Sound('otbev.ogg')
 
 
 
 font.init()
-font1 = font.SysFont('Arial', 50)
-win = font1.render("Игра окончена!", True, (200, 10, 50))
+font1 = font.SysFont('Arial', 30)
+score_proiden = font1.render(f'Ваш счёт: '+ str(amount_proiden), True, (100, 100, 100))
+font2 = font.SysFont('Arial', 50)
+game_over = font2.render('Игра окончена', True, (200, 100, 100))
+game_over_score = font2.render('Ваш счёт:' + str(amount_proiden), True, (150, 100, 100))
+
+amount_jump = 0
+jump = False
+
+class Platform (sprite.Sprite):
+    def __init__(self, color_1, color_2, color_3, width, height, rect_x, rect_y, speed):
+        super().__init__()
+        self.color_1 = color_1
+        self.color_3 = color_2
+        self.color_3 = color_3
+        self.width = width
+        self.height = height
+        self.image = Surface((self.width, self.height))
+        self.image.fill((color_1, color_2, color_3))
+        self.rect = self.image.get_rect()
+        self.rect.x = rect_x
+        self.rect.y = rect_y
+        self.speed = speed
+        
+
+    def update(self):
+        self.rect.y += 1
+        if self.rect.y >= 490:
+            self.rect.y = randint(0, 100)
+            self.rect.x = randint(10, 690)
+    #    window.blit(self.image, (self.rect.x, self.rect.y))
+    def fall(self):
+        self.rect.y += self.speed
+
+    # def reset(self):
+    #     self.rect.y -= 5
 
 
-mixer.init()
-mixer.music.load('fon_music.mp3')
-mixer.music.play()
-#otbev = mixer.Sound('otbev.mp3')
 
-
-
-
-
-
-
-
-
+    
 class GameSprite (sprite.Sprite):
     def __init__(self, player_image, player_x, player_y, size_x, size_y , player_speed_x, player_speed_y):
         super().__init__()
@@ -45,120 +79,119 @@ class GameSprite (sprite.Sprite):
 
     def colliderect(self, rect):
         return self.rect.colliderect(rect)
+    
+    def jump(self):
+        global amount_jump, jump
+        if amount_jump <= 100:
+            amount_jump += 1
+            self.rect.y -= 2
+        else:
+            jump = False
+            amount_jump = 0
+        
+
+
+player = GameSprite('ball_stal.png', 50, 400, 50, 30, 3, 3)
+
+
+
+platforms = sprite.Group()
+fall_platforms = sprite.Group()
+
+platform = Platform(100, 80, 0, 100, 10, 50, 450, 0)
+platforms.add(platform)
+for i in range(5):
+    platform = Platform(100, 80, 0, 100, 10, randint(0,700), randint(150,450), 0)
+    platforms.add(platform)
+for i in range(2):
+    fall_platform = Platform(100, 80, 0, 100, 10, randint(0,700), 0, 0)
+    fall_platforms.add(fall_platform)
 
 
 
 
-
-class Wall (sprite.Sprite):
-    def __init__(self, color_1, color_2, color_3, width, height, rect_x, rect_y, speed):
-        super().__init__()
-        self.color_1 = color_1
-        self.color_3 = color_2
-        self.color_3 = color_3
-        self.width = width
-        self.height = height
-        self.image = Surface((self.width, self.height))
-        self.image.fill((color_1, color_2, color_3))
-        self.rect = self.image.get_rect()
-        self.rect.x = rect_x
-        self.rect.y = rect_y
-        self.speed = speed
-
-    def draw_wall(self):
-        window.blit(self.image, (self.rect.x, self.rect.y))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-platform_1 = Wall(100, 60, 30, 10, 100, 50, 50, 5)
-platform_2 = Wall(100, 90, 90, 10, 100, 650, 350, 5)
-
-ball = GameSprite('ball_stal.png', 350, 250, 30, 30, 3, 3)
 
 
 
 
 finish = False
 
-while game == True:
 
+while game:
     keys = key.get_pressed()
-    
-
 
     for e in event.get():
         if e.type == QUIT:
             game = False
 
+    if finish == False:
 
-    
-
-    if finish != True:
         window.blit(fon, (0, 0))
+        platforms.draw(window)
+        fall_platforms.draw(window)
+        fall_platforms.fall()
+        #platforms.update()
+        player.reset()
+        score_proiden = font1.render(f'Вы уничтожили: '+ str(amount_proiden), True, (100, 100, 100))
 
-        platform_1.draw_wall()
-        platform_2.draw_wall()
-        ball.reset()
-        ball.rect.x += ball.speed_x
-        ball.rect.y += ball.speed_y
-
-        if ball.rect.y < 0:
-            ball.speed_y *= -1
-        if ball.rect.y > 475:
-            ball.speed_y *= -1
-        
-        if ball.rect.x > 690:
-            window.blit(win, (200, 200))
-            finish = True
-        if ball.rect.x < 10:
-            window.blit(win, (200, 200))
-            finish = True
-
-        if ball.colliderect(platform_1.rect):
-            #otbev.play()
-            ball.speed_x -= 1.2
-            ball.speed_x *= -1
-            
-        if ball.colliderect(platform_2.rect):
-            #otbev.play()
-            ball.speed_x += 1.2
-            ball.speed_x *= -1
-            
-        
-
-        
-
-        
-
-        if keys[K_w] and platform_1.rect.y > 0:
-            platform_1.rect.y -= platform_1.speed
-        if keys[K_s] and platform_1.rect.y < 400:
-            platform_1.rect.y += platform_1.speed
-
-        if keys[K_UP] and platform_2.rect.y > 0:
-            platform_2.rect.y -= platform_2.speed
-        if keys[K_DOWN] and platform_2.rect.y < 400:
-            platform_2.rect.y += platform_2.speed
-
-        
-
-
-
-
+        window.blit(score_proiden, (0, 30))
     
-    
+        # if keys[K_SPACE]:
+        #     jump = True
+        #     player.jump()
+        
+        if keys[K_LEFT]:
+            player.rect.x -= player.speed_x
+        
+        if keys[K_RIGHT]:
+            player.rect.x += player.speed_x
+        
+        if jump == False:
+            player.rect.y += 2
+        else:
+            player.jump()
+        
+        
+        if (sprite.spritecollide(player, platforms, False) or sprite.spritecollide(player, platforms, False)) and jump == False:
+            otbev.play()
+            jump = True
+        
+
+        if player.rect.y < 150:
+            amount_proiden += 1
+            platforms.update()
+            player.rect.y += 2
+        
+        if player.rect.y > 475:
+            game_over = font2.render('Игра окончена', True, (150, 100, 100))
+            game_over_score = font2.render('Ваш счёт:' + str(amount_proiden), True, (200, 100, 100))
+            
+            finish = True
+    else:
+        window.blit(fon_game_over, (0, 0))
+        window.blit(game_over, (0, 250))
+        window.blit(game_over_score, (0, 350))
+
+            
+
+
+
+
+
     clock.tick(FPS)
     display.update()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
