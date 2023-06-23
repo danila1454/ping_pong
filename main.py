@@ -96,16 +96,16 @@ player = GameSprite('ball_stal.png', 50, 400, 50, 30, 3, 3)
 
 
 platforms = sprite.Group()
-fall_platforms = sprite.Group()
+#fall_platforms = sprite.Group()
 
 platform = Platform(100, 80, 0, 100, 10, 50, 450, 0)
 platforms.add(platform)
 for i in range(5):
     platform = Platform(100, 80, 0, 100, 10, randint(0,700), randint(150,450), 0)
     platforms.add(platform)
-for i in range(2):
-    fall_platform = Platform(100, 80, 0, 100, 10, randint(0,700), 0, 0)
-    fall_platforms.add(fall_platform)
+# for i in range(2):
+    fall_platform = Platform(100, 80, 0, 100, 10, randint(0,700), 0, 2)
+#     fall_platforms.add(fall_platform)
 
 
 
@@ -128,8 +128,8 @@ while game:
 
         window.blit(fon, (0, 0))
         platforms.draw(window)
-        fall_platforms.draw(window)
-        fall_platforms.fall()
+        window.blit(fall_platform.image, (fall_platform.rect.x, fall_platform.rect.y))
+        fall_platform.fall()
         #platforms.update()
         player.reset()
         score_proiden = font1.render(f'Вы уничтожили: '+ str(amount_proiden), True, (100, 100, 100))
@@ -152,10 +152,16 @@ while game:
             player.jump()
         
         
-        if (sprite.spritecollide(player, platforms, False) or sprite.spritecollide(player, platforms, False)) and jump == False:
+        if (sprite.spritecollide(player, platforms, False) or player.colliderect(fall_platform.rect) )and jump == False:
             otbev.play()
             jump = True
         
+        if player.rect.x > 700:
+            player.rect.x = 0
+
+        if player.rect.x < 0 :
+            player.rect.x = 700
+
 
         if player.rect.y < 150:
             amount_proiden += 1
@@ -165,8 +171,11 @@ while game:
         if player.rect.y > 475:
             game_over = font2.render('Игра окончена', True, (150, 100, 100))
             game_over_score = font2.render('Ваш счёт:' + str(amount_proiden), True, (200, 100, 100))
-            
             finish = True
+
+        if fall_platform.rect.y >= 490:
+            fall_platform.rect.y = 0
+            fall_platform.rect.x = randint(10, 690)
     else:
         window.blit(fon_game_over, (0, 0))
         window.blit(game_over, (0, 250))
